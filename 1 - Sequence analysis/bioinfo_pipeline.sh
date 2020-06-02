@@ -10,6 +10,21 @@ bowtie2 http://bowtie-bio.sourceforge.net/bowtie2/index.shtml
 seaview http://doua.prabi.fr/software/seaview
 CONSTAX https://github.com/Gian77/CONSTAX/
 
+
+Raw reads are available on the Joint Genomes Institute Genome Portal under Project ID 1191516 
+https://genome.jgi.doe.gov/portal/SwiandphyiTagsII_FD/SwiandphyiTagsII_FD.download.html 
+(52 phyllosphere samples)
+and  
+https://genome.jgi.doe.gov/portal/pages/dynamicOrganismDownload.jsf?organism=SwiandsoiiTagsII_FD 
+(57 soil sequences). 
+
+**************************************************************************************
+Note that although only the phyllosphere results are presented in the paper, both
+phyllosphere and soil samples were used in the preparation of the OTU table described here.
+The OTU table is then subsetted to include only phyllosphere samples in R.
+**************************************************************************************
+
+
 #1) check quality of original raw sequence data---------------------------------
 mkdir stats
 cd raw_reads/
