@@ -519,12 +519,17 @@ leaf_core_abundance <- data.frame(otu = as.factor(row.names(rel_otu_rare)), rel_
   left_join(leaf_clusters, by='otu') %>%
   group_by(sampling_date) %>%
   mutate(sample_size = length(unique(sequence_name))) %>%
+  group_by(sampling_week, sampling_date, memb_leaf, stage, sequence_name) %>%
+  summarise(n_totalrelabun=sum(abun)) %>% ##get total abundance of genus for each sample/rep
   group_by(sampling_week, sampling_date, memb_leaf, stage) %>%
-  summarize(n_relabun=sum(abun)/unique(sample_size)) %>%
+  summarise(n_relabun = mean(n_totalrelabun),
+            n_sd = sd(n_totalrelabun)) %>% ##get mean, SD abundance of genus for each sample/rep
   filter(!is.na(memb_leaf)) %>%
   ggplot(aes(x=as.Date(sampling_date), y=n_relabun, color=as.factor(memb_leaf), group=memb_leaf))+
   geom_line(size=2,linetype = "dashed")+
   geom_point(size=4)+
+  geom_errorbar(aes(ymin=n_relabun-n_sd, ymax=n_relabun+n_sd), width=10, size=1.1,
+                position=position_dodge(.1))+
   scale_color_manual(values = c('dodgerblue1','dodgerblue4','coral1','coral4','green2','green4',
                                 'red'))+
   theme_classic() + theme(strip.background = element_blank(), 
@@ -533,11 +538,12 @@ leaf_core_abundance <- data.frame(otu = as.factor(row.names(rel_otu_rare)), rel_
                           legend.key.size = unit(.8, "cm"), legend.title = element_text(size=12)) +
   labs(x=NULL, y=NULL, color='Core OTU Cluster')+
   theme(axis.title.y = element_text(size = 16),
-          text = element_text(size=22))+
+        text = element_text(size=22))+
   ylab("Relative abundance")+
-  ylim(0, 0.74)+
+  ylim(-0.1, 0.9)+
   labs(tag = "B")
 leaf_core_abundance
+
 
 
 
@@ -550,10 +556,11 @@ leaf_core_taxonomy_prep <- data.frame(otu = as.factor(row.names(rel_otu_rare)), 
   filter(otu %in% fungalcore_sw17) %>%
   left_join(leaf_clusters, by='otu') %>%
   left_join(keep_otus, by='otu') %>%
+  group_by(Class, sampling_date, sequence_name) %>%
+  summarise(n_totalrelabun=sum(abun)) %>% ##get total abundance of genus for each sample/rep
   group_by(Class, sampling_date) %>%
-  summarise(n_count=sum(abun),
-            n_sample=length(unique(sequence_name)),
-            norm_ra=n_count/n_sample)
+  summarise(norm_ra = mean(n_totalrelabun),
+            n_sd = sd(n_totalrelabun)) ##get mean, SD abundance of genus for each sample/rep
 
 # Get levels and add "Unidentified"
 levels <- levels(leaf_core_taxonomy_prep$Class)
@@ -580,6 +587,8 @@ leaf_core_taxonomy_prep <- leaf_core_taxonomy_prep[ ! leaf_core_taxonomy_prep$Cl
 leaf_core_taxonomy<-  ggplot(data=leaf_core_taxonomy_prep,aes(x=sampling_Rdate, y=norm_ra, color=Class, group=Class)) +
   geom_line(size=2) +
   geom_point(size=4)+
+  geom_errorbar(aes(ymin=norm_ra-n_sd, ymax=norm_ra+n_sd), width=10, size=1.1,
+                position=position_dodge(.1))+
   scale_color_manual(values = c('red','dodgerblue3','grey','green4','yellow4','coral3',
                                 'greenyellow','indianred4','black'))+
   theme_classic() + theme(strip.background = element_blank(),
@@ -589,7 +598,7 @@ leaf_core_taxonomy<-  ggplot(data=leaf_core_taxonomy_prep,aes(x=sampling_Rdate, 
   scale_x_date(date_breaks = "1 month", labels=date_format("%b"))+
   theme(axis.title.y = element_text(size = 18),
         text = element_text(size=18))+
-  ylim(0, 0.99)+
+  ylim(-0.1, 0.99)+
   labs(tag = "A")+
   guides(col=guide_legend(nrow=3,byrow=FALSE))
   
@@ -608,10 +617,11 @@ leaf_core_taxonomy_prep2 <- data.frame(otu = as.factor(row.names(rel_otu_rare)),
   filter(otu %in% fungalcore_sw17) %>%
   left_join(leaf_clusters, by='otu') %>%
   left_join(keep_otus, by='otu') %>%
+  group_by(Phylum, sampling_date, sequence_name) %>%
+  summarise(n_totalrelabun=sum(abun)) %>% ##get total abundance of genus for each sample/rep
   group_by(Phylum, sampling_date) %>%
-  summarise(n_count=sum(abun),
-            n_sample=length(unique(sequence_name)),
-            norm_ra=n_count/n_sample)
+  summarise(norm_ra = mean(n_totalrelabun),
+            n_sd = sd(n_totalrelabun)) ##get mean, SD abundance of genus for each sample/rep
 
 levels <- levels(leaf_core_taxonomy_prep2$Phylum)
 levels[length(levels) + 1] <- "Unidentified"
@@ -627,6 +637,8 @@ leaf_core_taxonomy_prep2$sampling_Rdate <- as.Date(leaf_core_taxonomy_prep2$samp
 leaf_core_taxonomy2<-  ggplot(data=leaf_core_taxonomy_prep2,aes(x=sampling_Rdate, y=norm_ra, color=Phylum, group=Phylum)) +
   geom_line(size=2) +
   geom_point(size=4)+
+  geom_errorbar(aes(ymin=norm_ra-n_sd, ymax=norm_ra+n_sd), width=10, size=1.1,
+                position=position_dodge(.1))+
   scale_color_manual(values = c('red','blue','grey','green4','chocolate4','magenta',
                                 'greenyellow','indianred4','yellow4','violet',
                                 'turquoise4','yellow','darksalmon',
@@ -662,10 +674,14 @@ leaf_core_taxonomy_prep3 <- data.frame(otu = as.factor(row.names(rel_otu_rare)),
   filter(otu %in% fungalcore_sw17) %>%
   left_join(leaf_clusters, by='otu') %>%
   left_join(keep_otus, by='otu') %>%
+  group_by(Genus, sampling_date, sequence_name) %>%
+  summarise(n_totalrelabun=sum(abun)) %>% ##get total abundance of genus for each sample/rep
   group_by(Genus, sampling_date) %>%
-  summarise(n_count=sum(abun),
-            n_sample=length(unique(sequence_name)),
-            norm_ra=n_count/n_sample)
+  summarise(norm_ra = mean(n_totalrelabun),
+            n_sd = sd(n_totalrelabun)) ##get mean, SD abundance of genus for each sample/rep
+
+
+
 
 ##Count number of OTUs on each date where genus was unidentified
 #first get for every sample/date, all core OTUs wehere genus was unidentified
@@ -710,6 +726,8 @@ leaf_core_taxonomy_prep3 <- leaf_core_taxonomy_prep3[ ! leaf_core_taxonomy_prep3
 leaf_core_taxonomy3<-  ggplot(data=leaf_core_taxonomy_prep3,aes(x=sampling_Rdate, y=norm_ra, color=Genus, group=Genus)) +
   geom_line(size=2) +
   geom_point(size=4)+
+  geom_errorbar(aes(ymin=norm_ra-n_sd, ymax=norm_ra+n_sd), width=10, size=1.1,
+                position=position_dodge(.1))+
   scale_color_manual(values = c('red','blue','grey','green4','chocolate4','magenta',
                                 'greenyellow','indianred3','yellow4','violet',
                                 'turquoise4','yellow','darksalmon',
@@ -721,10 +739,9 @@ leaf_core_taxonomy3<-  ggplot(data=leaf_core_taxonomy_prep3,aes(x=sampling_Rdate
   scale_x_date(date_breaks = "1 month", labels=date_format("%b"))+
   theme(axis.title.y = element_text(size = 16),
         text = element_text(size=22))+
-  ylim(0, 0.74)+
-  labs(tag = "C")
+  ylim(-0.1, 0.90)+
+  labs(tag = "C") 
 leaf_core_taxonomy3
-
 
 
 #Figure 4-------------------------
