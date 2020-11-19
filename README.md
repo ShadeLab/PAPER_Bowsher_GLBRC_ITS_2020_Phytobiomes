@@ -4,7 +4,7 @@
 ---
 ## By Alan W. Bowsher, Gian Maria Niccolò Benucci, Gregory Bonito and Ashley Shade
 ---
-* This work is published.
+*This work is published*
 
 ## To cite this work or code
 Bowsher AW, GMN Benucci, G Bonito, and A Shade. 2020. Seasonal dynamics of core fungi and bacterial networks in the switchgrass phyllosphere. Phytobiomes Journal. AOP 13 October 2020. https://apsjournals.apsnet.org/doi/10.1094/PBIOMES-07-20-0051-R 
